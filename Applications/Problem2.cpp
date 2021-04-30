@@ -1,5 +1,5 @@
 #include<bits/stdc++.h>
-
+// g++ -std=c++17 -Wl,-stack_size -Wl,0x10000000 main.cpp
 #define mt make_tuple
 #define mp make_pair
 #define pu push_back
@@ -29,8 +29,9 @@ template<class A, class B> ostream& operator<<(ostream& out, const pair<A, B> &a
 template <int> ostream& operator<<(ostream& os, const vector<int>& v) { os << "["; for (int i = 0; i < v.size(); ++i) { if(v[i]!=INF) os << v[i]; else os << "INF";if (i != v.size() - 1) os << ", "; } os << "]"; return os; } 
 template <typename T> ostream& operator<<(ostream& os, const vector<T>& v) { os << "["; for (int i = 0; i < v.size(); ++i) { os << v[i]; ;if (i != v.size() - 1) os << ", "; } os << "]"; return os; } 
 
-using namespace std;
-
+// Initialise the matching to the maximum outgoing edge and the other vertex is free
+// Set the labels to those edges
+// Return the number of matched vertices
 int initLabels(vector<int> &labelX, vector<int> &matchX, vector<int> &matchY, vector<vector<int> > &mat, int n, int m) {
     int matchedCounter = 0;
     for(int i = 0; i < n; i++) {
@@ -214,72 +215,62 @@ int HungarianAlgorithm(vector<vector<int> > &mat, int n, int m) {
     }
 
     // t(maximumWeightMatching);
-    return maximumWeightMatching ;
+    // cout << maximumWeightMatching << endl;
+    return maximumWeightMatching;
 }
 
-int main(){
-    int n;
-    cin >> n;
-    int enterTimes[n], exitTimes[n];
-    for(int i=0;i<n;i++) cin >> enterTimes[i];
-    for(int i=0;i<n;i++) cin >> exitTimes[i];
-    int speedTime, fineCap;
-    cin >> speedTime >> fineCap;
-    vector<vector<int>> cost(n, vector<int>(n));
-    for(int i=0;i<n;i++){
-        for(int j=0;j<n;j++){
-            int T = exitTimes[j] - enterTimes[i];
-            if(T <= 0 || T >= speedTime) cost[i][j] = 0;
-            else cost[i][j] = min(fineCap,(speedTime-T)*(speedTime-T)); 
-            cost[i][j] = -cost[i][j];
+int calcDist(pair<int, int> &p1, pair<int, int> &p2) {
+    return (abs(p1.fi - p2.fi) + abs(p1.se - p2.se));
+}
+
+int main() {
+    __;
+    int n, m;
+    cin >> n >> m;
+    vector<pair<int, int> > v(n), w(m);
+    for(int i = 0; i < n; i++) {
+        cin >> v[i].fi >> v[i].se;
+    }
+
+    for(int j = 0; j < m; j++) {
+        cin >> w[j].fi >> w[j].se;
+    }
+
+    pair<int, int> rest;
+    cin >> rest.fi >> rest.se;
+
+    vector<vector<int> > mat(n, vector<int>(m+n-1));
+
+    for(int i = 0; i < n; i++) {
+        for(int j = 0; j < m; j++) {
+            mat[i][j] = - (calcDist(v[i], w[j]) + calcDist(v[i], rest));
+        }
+        for(int j = m; j < n + m - 1; j++) {
+            mat[i][j] = -calcDist(v[i], rest) * 2;
         }
     }
-    cout << -HungarianAlgorithm(cost, n,n) << endl;
-    for(int i=0;i<n;i++){
-        for(int j=0;j<n;j++) cost[i][j] = -cost[i][j];
-    }
-    cout << HungarianAlgorithm(cost, n,n) << endl;
+
+    int maximumWeightMatching = -HungarianAlgorithm(mat, n, m + n - 1);
+
+    cout << maximumWeightMatching << endl;
+    return 0;
 }
 
 /*
-Input :
-2
-1 2
-4 5
-3
-100
-Output :
-0
-1
+3 3
+3 2 3
+1 2 0
+3 2 1
 
-Input :
-2
-2 1
-60 40
-100
-100
-Output :
-200
-200
+3 3
+1 6 0
+0 8 6
+4 0 1
 
-Input :
-5
-1000 584 390 392 109
-987 724 814 597 422
-1
-30
-Output :
-0
-0
-
-Input :
-3
-1 2 3
-4 5 6
-7
-42
-Output :
-48
-56
+3 3
+1 4 5
+5 7 6
+5 8 8
 
 */
+
