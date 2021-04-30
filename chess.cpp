@@ -1,6 +1,5 @@
 #include<bits/stdc++.h>
-#include <graphics.h>
-// g++ -std=c++17 -Wl,-stack_size -Wl,0x10000000 main.cpp
+
 #define mt make_tuple
 #define mp make_pair
 #define pu push_back
@@ -30,59 +29,8 @@ template<class A, class B> ostream& operator<<(ostream& out, const pair<A, B> &a
 template <int> ostream& operator<<(ostream& os, const vector<int>& v) { os << "["; for (int i = 0; i < v.size(); ++i) { if(v[i]!=INF) os << v[i]; else os << "INF";if (i != v.size() - 1) os << ", "; } os << "]"; return os; } 
 template <typename T> ostream& operator<<(ostream& os, const vector<T>& v) { os << "["; for (int i = 0; i < v.size(); ++i) { os << v[i]; ;if (i != v.size() - 1) os << ", "; } os << "]"; return os; } 
 
-void draw_graph(vector<int> labelX, vector<int>labelY, vector<vector<int>> mat, int n, int m, vector<bool> S, vector<bool> T, vector<int> matchY){
-    pair<int,int> Xcoord[n];
-    pair<int,int> Ycoord[m];
-    // drawing nodes
-    for(int i=0;i<n;i++) {
-        Xcoord[i] = {50,80*i+50};
-        circle(Xcoord[i].first,Xcoord[i].second,30);
-        char label[10];
-        sprintf(label,"%d",labelX[i]);
-        outtextxy(Xcoord[i].first, Xcoord[i].second, label);
-    }
-    for(int i=0;i<m;i++) {
-        Ycoord[i] = {150,80*i+50};
-        circle(Ycoord[i].first,Ycoord[i].second,30);
-        char label[10];
-        sprintf(label,"%d",labelY[i]);
-        outtextxy(Ycoord[i].first, Ycoord[i].second, label);
-    }
-    // drawing equality graph
-    for(int i=0;i<n;i++){
-        for(int j=0;j<m;j++){
-            if(labelX[i] + labelY[j] == mat[i][j]){
-                if(matchY[j]==i){
-                    setcolor(4);
-                }
-                line(Xcoord[i].first, Xcoord[i].second, Ycoord[j].first, Ycoord[j].second);
-                setcolor(15);
-            }
-        }
-    }
-    // label for S and T
-    for(int i=0;i<n;i++){
-        if(S[i]){
-            char label[2] = "S";
-            outtextxy(Xcoord[i].first-40, Xcoord[i].second, label);
-        }
-    }
-    for(int i=0;i<m;i++){
-        if(T[i]){
-            char label[2] = "T";
-            outtextxy(Ycoord[i].first+40, Ycoord[i].second, label);
-        }
-    }
-    // int in = 0;
-    // while (in == 0) {
-    //     in = getchar();
-    // }
-    delay(10000);
-}
+using namespace std;
 
-// Initialise the matching to the maximum outgoing edge and the other vertex is free
-// Set the labels to those edges
-// Return the number of matched vertices
 int initLabels(vector<int> &labelX, vector<int> &matchX, vector<int> &matchY, vector<vector<int> > &mat, int n, int m) {
     int matchedCounter = 0;
     for(int i = 0; i < n; i++) {
@@ -197,9 +145,6 @@ void HungarianAlgorithm(vector<vector<int> > &mat, int n, int m) {
     vector<int> matchX(n, -1), matchY(m, -1);
 
     int matchedCounter = initLabels(labelX, matchX, matchY, mat, n, m);
-
-    int gd = DETECT, gm;
-    initgraph(&gd, &gm, NULL);
     
     for(; matchedCounter < min(n, m); matchedCounter++) {
         vector<bool> setS(n), setT(m);
@@ -222,7 +167,6 @@ void HungarianAlgorithm(vector<vector<int> > &mat, int n, int m) {
 
         int setSCounter = 1;
         while(true) {
-            draw_graph(labelX,labelY,mat,n,m,setS,setT,matchY);
             int neighbour = -1;
             // t(setS, setT, labelX, labelY, matchX, matchY);
             bool neighbourSetEqual = checkNeighbours(setT, slack, neighbour, m);
@@ -255,7 +199,6 @@ void HungarianAlgorithm(vector<vector<int> > &mat, int n, int m) {
                 changeLabel(labelX, labelY, slack, setS, setT);
             }
         }
-        draw_graph(labelX,labelY,mat,n,m,setS,setT,matchY);
     }
 
     // t(labelX, labelY);
@@ -270,37 +213,54 @@ void HungarianAlgorithm(vector<vector<int> > &mat, int n, int m) {
         maximumWeightMatching += it;
     }
 
-    closegraph();
-
     // t(maximumWeightMatching);
     cout << maximumWeightMatching << endl;
 }
 
-int main() {
-    __;
-    int n, m;
-    cin >> n >> m;
-    vector<vector<int> > v(n, vector<int>(m));
-    for(int i = 0; i < n; i++) for(int j = 0; j < m; j++) cin >> v[i][j];
-
-    HungarianAlgorithm(v, n, m);
-    return 0;
+int main(){
+    int n;
+    cin >> n;
+    int us[n], them[n];
+    for(int i=0;i<n;i++) cin >> us[i];
+    for(int i=0;i<n;i++) cin >> them[i];
+    vector<vector<int>> cost(n, vector<int>(n));
+    for(int i=0;i<n;i++){
+        for(int j=0;j<n;j++){
+            if(us[i] > them[j]) cost[i][j] = 2;
+            else if(us[i] < them[j]) cost[i][j] = 0;
+            else cost[i][j] = 1;
+        }
+    }
+    HungarianAlgorithm(cost, n, n);
 }
 
 /*
-3 3
-3 2 3
-1 2 0
-3 2 1
+Input :
+2
+5 8
+7 3
+Output :
+4
 
-3 3
-1 6 0
-0 8 6
-4 0 1
+Input :
+2
+7 3
+5 8
+Output :
+2
 
-3 3
-1 4 5
-5 7 6
-5 8 8
+Input :
+3
+10 5 1
+10 5 1
+Output :
+4
+
+Input :
+4 
+1 10 7 4
+15 3 8 7
+Output :
+5
 
 */
